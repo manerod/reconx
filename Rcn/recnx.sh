@@ -1,5 +1,22 @@
-
 # !/bin/bash
+
+RED="\033[0;31m" 		# Error / Issues
+GREEN="\033[0;32m"		# Successful       
+BOLD="\033[01;01m"    		# Highlight
+WHITE="\033[1;37m"		# BOLD
+YELLOW="\033[1;33m"		# Warning
+LGRAY="\033[0;37m"		# Light Gray
+LRED="\033[1;31m"		# Light Red
+LGREEN="\033[1;32m"		# Light GREEN
+LBLUE="\033[1;34m"		# Light Blue
+LPURPLE="\033[1;35m"		# Light Purple
+LCYAN="\033[1;36m"		# Light Cyan
+SORANGE="\033[0;33m"		# Standar Orange
+SBLUE="\033[0;34m"		# Standar Blue
+SPURPLE="\033[0;35m"		# Standar Purple      
+SCYAN="\033[0;36m"		# Standar Cyan
+DGRAY="\033[1;30m"		# Dark Gray
+
 
 printf "\n"
 printf "╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋╋
@@ -22,16 +39,16 @@ printf "\n"
 	cd ~/Desktop/recon/$1/
 
 #1 -Subdomain
-	echo -e "\e[32mUrl: $1 $2\033[0m" | tee -a salida.txt
-	echo -e "\e[32m************ Starting Scrapping... ************\033[0m" | tee -a salida.txt
+	echo -e "${SPURPLE} Url: $1 $2\033[0m" | tee -a salida.txt
+	echo -e "${SCYAN}************ Starting Scrapping... ************\033[0m" | tee -a salida.txt
 
-	echo -e "\e[32m\tDoing Amass...\033[0m" | tee -a salida.txt
+	echo -e "${LGREEN}Doing Amass...\033[0m" | tee -a salida.txt
 	amass enum -active -d $1 -o amass$1.txt > /dev/null 2>&1
 
-	echo -e "\e[32m\tDoing Subfinder...\033[0m" | tee -a salida.txt
+	echo -e "${LGREEN}Doing Subfinder...\033[0m" | tee -a salida.txt
 	subfinder -d $1 -o subfinder$1.txt > /dev/null 2>&1
 
-	echo -e "\e[32m\tDoing Subscraper...\033[0m" | tee -a salida.txt
+	echo -e "${LGREEN}Doing Subscraper...\033[0m" | tee -a salida.txt
         cd ~/tools/subscraper && python3 subscraper.py -u $1 -o ~/Desktop/recon/$1/subscraper$1.txt > /dev/null 2>&1
 	cd ~/Desktop/recon/$1/
 
@@ -43,8 +60,8 @@ printf "\n"
 	sort -u -o subdominios$1.txt subdominios$1.txt
 
 	if [[ -f subdominios$1.txt && ! -s subdominios$1.txt ]]; then
-		echo -e "\e[32m*********** No domains ************\033[0m" | tee -a salida.txt
-		echo -e "\e[32m***********************************************\033[0m" | tee -a salida.txt
+		echo -e "${SPURPLE}*********** No domains ************\033[0m" | tee -a salida.txt
+		echo -e "${SPURPLE}***********************************************\033[0m" | tee -a salida.txt
 		return
 	fi
 
@@ -112,20 +129,3 @@ printf "\n"
 	echo -e "\e[32m************ Alive Checking done... ***********\033[0m" | tee -a salida.txt
 
 
-	if [[ -f nmapips$1.txt && -s nmapips$1.txt ]]; then
-		echo -e "\e[32m\tDoing Nmap to check port service versions...\033[0m" | tee -a salida.txt
-		touch nmapservices$1.txt
-		cat nmapips$1.txt | while read ipaescanear; do
-			ports=$(nmap -Pn -p- --min-rate=30000 -T4 $ipaescanear | grep ^[0-9] | cut -d '/' -f 1 | tr '\n' ',' | sed s/,$//)
-			length=$(echo $ports | sed 's/[^,]//g' | awk '{ print length }')
-#-- escaneo hasta 40 puertos, a veces el nmap detecta (de cloudflare x ejemplo) cientos de puertos abiertos, y es mentira
-			if (($length <= 40)); then
-				# -sC es más rapido que -sV
-				nmap -Pn -sT -p$ports -T5 --script=vuln $ipaescanear >> nmapservices$1.txt < /dev/null 2>&1
-			fi
-		done
-	fi
-	rm -f nmaptemp$1.txt  2> /dev/null
-	echo -e "\e[32m************* Port scanning done... ***********\033[0m" | tee -a salida.txt
-
-#
