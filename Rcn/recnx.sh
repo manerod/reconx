@@ -52,10 +52,14 @@ printf "\n"
         cd ~/tools/subscraper && python3 subscraper.py -u $1 -o ~/Desktop/recon/$1/subscraper$1.txt > /dev/null 2>&1
 	cd ~/Desktop/recon/$1/
 
+	echo -e "${LGREEN}Doing Github Subdomains...\033[0m" | tee -a salida.txt
+        cd ~/tools/github-search  && python3 github-subdomains.py -d $1 |tee -a ~/Desktop/recon/$1/githubsubdomains$1.txt > /dev/null 2>&1
+        cd ~/Desktop/recon/$1/
+
 	# junto los resultados, quito dominios que no sirven
-	cat amass$1.txt subfinder$1.txt subscraper$1.txt  | grep "\.$1\|^$1" > subdominios$1.txt
+	cat amass$1.txt subfinder$1.txt subscraper$1.txt githubsubdomains$1.txt  | grep "\.$1\|^$1" > subdominios$1.txt
 	# borro los archivos temporales
-	rm -f amass$1.txt subfinder$1.txt subscraper$1.txt  2> /dev/null
+	rm -f amass$1.txt subfinder$1.txt subscraper$1.txt githubsubdomains$1.txt  2> /dev/null
 	# los ordeno y quito dominios duplicados
 	sort -u -o subdominios$1.txt subdominios$1.txt
 
