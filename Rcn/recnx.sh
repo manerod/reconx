@@ -1,7 +1,7 @@
 # !/bin/bash
 
 RED="\033[0;31m" 		# Error / Issues
-GREEN="\033[0;32m"		# Successful       
+GREEN="\033[0;32m"		# Successful
 BOLD="\033[01;01m"    		# Highlight
 WHITE="\033[1;37m"		# BOLD
 YELLOW="\033[1;33m"		# Warning
@@ -13,7 +13,7 @@ LPURPLE="\033[1;35m"		# Light Purple
 LCYAN="\033[1;36m"		# Light Cyan
 SORANGE="\033[0;33m"		# Standar Orange
 SBLUE="\033[0;34m"		# Standar Blue
-SPURPLE="\033[0;35m"		# Standar Purple      
+SPURPLE="\033[0;35m"		# Standar Purple
 SCYAN="\033[0;36m"		# Standar Cyan
 DGRAY="\033[1;30m"		# Dark Gray
 
@@ -87,7 +87,7 @@ printf "\n"
 
 #3-Resolvemos Dns
 
-	if [[ -f altdns$1.txt && -s altdns$1.txt ]]; then
+	if [[ -f dnsgen$1.txt && -s dnsgen$1.txt ]]; then
 		echo -e "\e[32m\tDoing ShuffleDns to alternative domains...\033[0m" | tee -a salida.txt
 		shuffledns -d $1 -list dnsgen$1.txt -r ~/tools/fresh.py/resolvers.txt -silent -o dnsgenresolved$1.txt
 		count=$(cat "dnsgenresolved$1.txt" | wc -l)
@@ -102,6 +102,23 @@ printf "\n"
 	echo -e "\e[32m********** Starting Alive Checking... *********\033[0m" | tee -a salida.txt
 	echo -e "\e[32m\tDoing httpx...\033[0m" | tee -a salida.txt
 	httpx -l subdominios$1.txt -silent -o subdominiosvivos$1.txt
+
+
+
+
+#6-Buscamos los cnames
+
+	echo -e "${SCYAN}************ CNAMES ************\033[0m" | tee -a salida.txt
+	echo -e "${LGREEN}Doing Dnsprobe...\033[0m" | tee -a salida.txt
+	dnsprobe -l subdominiosvivos$1.txt -r cname -silent -o cnamesprovisorio$1.txt
+	awk '{print $2}' cnamesprovisorio$1.txt | tee -a cnames$1.txt
+	if [[ -f cnames$1.txt && ! -s cnames$1.txt ]]; then
+                echo -e "${SPURPLE}*********** No CNAMES ************\033[0m" | tee -a salida.txt
+                echo -e "${SPURPLE}***********************************************\033[0m" | tee -a salida.txt
+                return
+        fi
+
+
 
 
 #5-Nmap
